@@ -5,6 +5,7 @@ import Logo from "./Logo";
 import { useContext } from "react";
 import { UserContext } from "./UserContext";
 import { uniqBy } from "lodash";
+import axios from "axios";
 
 export default function Chat() {
 
@@ -69,6 +70,10 @@ export default function Chat() {
         }
 
     },[messages]);
+
+    useEffect(()=>{
+      axios.get('/messages'+selectedUserId)
+    },[selectedUserId]);
 
    const onlinePeopleExclOurUser = {...onilnePeople};
    delete onlinePeopleExclOurUser[id];

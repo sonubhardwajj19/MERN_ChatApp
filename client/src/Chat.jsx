@@ -18,15 +18,24 @@ export default function Chat() {
     const divUnderMessages = useRef();
 
     useEffect(()=>{
+         connectToWs();
+    },[])
+
+    function connectToWs () {
         const ws = new WebSocket('ws://localhost:4000');
         setWs(ws);
-
         ws.addEventListener('message',handleMessage);
-    },[])
+        ws.addEventListener('close',() => {
+            setTimeout(() => {
+                console.log('Disconnected, trying to reconnect');
+                connectToWs();
+            }, 1000);
+        })
+    }
 
     function handleMessage (ev) {
         const messageData = JSON.parse(ev.data);
-     
+    
         if('online' in messageData){
             showOnlinePeople(messageData.online);
         } else if('text' in messageData){
@@ -72,7 +81,7 @@ export default function Chat() {
     },[messages]);
 
     useEffect(()=>{
-      axios.get('/messages'+selectedUserId)
+      axios.get('/messages/'+selectedUserId)
     },[selectedUserId]);
 
    const onlinePeopleExclOurUser = {...onilnePeople};

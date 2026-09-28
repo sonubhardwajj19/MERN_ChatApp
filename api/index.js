@@ -45,6 +45,8 @@ app.post('/register' , async (req,res) => {
 })
 
 
+
+
 app.post('/login', async (req,res)  => {
     const {username,password} = req.body;
     const foundUser = await User.findOne({username});
@@ -77,7 +79,7 @@ async function getUserDataFromRequest(req) {
     })
 }
 
-app.get('/profile', (req,res) => {
+app.get('/profile',  (req,res) => {
   const token= req.cookies?.token;
   if(token) {
       jwt.verify(token,jwtSecret , (err, userData) => {
@@ -87,11 +89,12 @@ app.get('/profile', (req,res) => {
   } else {
     res.status(401).json('No token');
   }
-
 })
 
 
-app.get('/messages:userId',async (req,res)=>{
+
+
+app.get('/messages/:userId',async (req,res)=>{
     const {userId} = req.params;
     const userData = await getUserDataFromRequest(req);
     const ourUserId = userData.userId;
@@ -102,7 +105,6 @@ app.get('/messages:userId',async (req,res)=>{
     });
 
     res.json(messages);
-
 
 })
 
@@ -128,6 +130,7 @@ wss.on('connection', (connection,req)=>{
       }
     }
 
+
     // notify everyone when some new user connects
 
     [...wss.clients]
@@ -135,9 +138,9 @@ wss.on('connection', (connection,req)=>{
         client.send(JSON.stringify({
             online:  [...wss.clients]
             .map( c => ({userId:c.userId , username:c.username}))
-        }))
+      }))
     })
-
+    
 
     connection.on('message', async (message)=> {
     const messageData = JSON.parse(message.toString());

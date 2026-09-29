@@ -66,7 +66,7 @@ export default function Chat() {
             text:newMessageText,
             sender:id,
             recipient:selectedUserId,
-            id:Date.now()
+            _id:Date.now()
         }]))
         setNewMessageText('');
         
@@ -81,13 +81,15 @@ export default function Chat() {
     },[messages]);
 
     useEffect(()=>{
-      axios.get('/messages/'+selectedUserId)
+      axios.get('/messages/'+selectedUserId).then(res=>{
+        setMessages(res.data )
+      })
     },[selectedUserId]);
 
    const onlinePeopleExclOurUser = {...onilnePeople};
    delete onlinePeopleExclOurUser[id];
 
-   const messsagesWihtoutDupes = uniqBy(messages,'id');
+   const messsagesWihtoutDupes = uniqBy(messages,'_id');
 
     return <>
     <div className="flex h-screen">
@@ -124,11 +126,11 @@ export default function Chat() {
 
                 {!!selectedUserId && (
                 
-                    <div className="relative h-full overflow-y-scroll">
-                        <div className="absolute inset-0 m-4">
+                    <div className="relative h-full">
+                        <div className=" overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-transparent absolute top-0 right-0 left-0 bottom-0">
                             {messsagesWihtoutDupes.map(message => (
-                                <div className="flex">
-                                    <div className={"p-2.5 my-2 rounded-md text-sm inline-block "+ (message.sender === id ? 'bg-blue-500 text-white ml-auto' : 'bg-gray-400 text-white')}>
+                                <div key={message._id} className="flex ">
+                                    <div className={"p-2.5 my-2 mr-2  rounded-md text-sm max-w-[80%] break-words inline-block "+ (message.sender === id ? 'bg-blue-500 text-white ml-auto' : 'bg-gray-400 text-white')}>
                                         {message.text}
                                     </div>
                                 </div>

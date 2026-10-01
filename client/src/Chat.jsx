@@ -44,7 +44,8 @@ export default function Chat() {
     }
 
     function showOnlinePeople (peopleArray){
-      const people = {} ;   
+      const people = {} ;  
+
       // people object :- have key value pair As long as your key is unique, 
       // each user gets a separate entry
 
@@ -86,6 +87,14 @@ export default function Chat() {
       })
     },[selectedUserId]);
 
+    console.log("hi there")
+    useEffect(()=>{
+      axios.get('/people').then(res=>{
+        const offlinePeople = res.data.filter(p => p._id !== id);
+        console.log(offlinePeople)
+      })
+    },[onilnePeople])
+
    const onlinePeopleExclOurUser = {...onilnePeople};
    delete onlinePeopleExclOurUser[id];
 
@@ -104,7 +113,7 @@ export default function Chat() {
                 )}
 
                 <div className="flex py-3 pl-4 items-center gap-3">
-                   <Avatar username={onilnePeople[userId]} userId={userId}/> 
+                   <Avatar online={true} username={onilnePeople[userId]} userId={userId}/> 
                    <span className="text-gray-800">{onilnePeople[userId]}</span>
                 </div>
             </div>
@@ -126,8 +135,8 @@ export default function Chat() {
 
                 {!!selectedUserId && (
                 
-                    <div className="relative h-full">
-                        <div className=" overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-transparent absolute top-0 right-0 left-0 bottom-0">
+                    <div className="relative h-full ">
+                        <div className="p-2 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-transparent absolute top-0 right-0 left-0 bottom-0">
                             {messsagesWihtoutDupes.map(message => (
                                 <div key={message._id} className="flex ">
                                     <div className={"p-2.5 my-2 mr-2  rounded-md text-sm max-w-[80%] break-words inline-block "+ (message.sender === id ? 'bg-blue-500 text-white ml-auto' : 'bg-gray-400 text-white')}>

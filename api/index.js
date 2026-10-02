@@ -14,6 +14,7 @@ dotenv.config();
 
 const app = express();
 
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -79,6 +80,7 @@ async function getUserDataFromRequest(req) {
     })
 }
 
+
 app.get('/profile',  (req,res) => {
   const token= req.cookies?.token;
   if(token) {
@@ -96,6 +98,8 @@ app.get('/people', async (req,res) => {
     res.json(users);
 })
 
+
+
 app.get('/messages/:userId',async (req,res)=>{
     const {userId} = req.params;
     const userData = await getUserDataFromRequest(req);
@@ -107,7 +111,7 @@ app.get('/messages/:userId',async (req,res)=>{
     }).sort({createdAt:1});
 
     res.json(messages);
-
+    
 })
 
 const server = app.listen(4000);
@@ -119,39 +123,43 @@ wss.on('connection', (connection,req)=>{
     const cookies = req.headers.cookie;
     if(cookies){
         const tokenCookieString = cookies.split(';').find(string => string.startsWith('token='));
-     if(tokenCookieString) {
-          const token = tokenCookieString.split('=')[1];
-          if (token){
-              jwt.verify(token,jwtSecret,{},(err,userData)=>{
-               if(err) throw err;
-               const {userId,username} = userData;
-               connection.userId = userId;
-               connection.username = username;
-            })
-          }
-      }
+        if(tokenCookieString) {
+            const token = tokenCookieString.split('=')[1];
+            if (token){
+                jwt.verify(token,jwtSecret,{},(err,userData)=>{
+                    if(err) throw err;
+                    const {userId,username} = userData;
+                    connection.userId = userId;
+                    connection.username = username;
+                })
+            }
+        }
     }
-
-
+    
+    
     // notify everyone when some new user connects
-
+    
     [...wss.clients]
     .forEach(client => {
         client.send(JSON.stringify({
             online:  [...wss.clients]
             .map( c => ({userId:c.userId , username:c.username}))
-      }))
+        }))
     })
     
-
-
+    
+    
     connection.on('message', async (message)=> {
-    const messageData = JSON.parse(message.toString());
-    const {recipient,text} = messageData;
-
-    // we are using userId jo message object mai aayi thi => usssai pehle reciever ko find kr rhe hain
+        console.log("hintner");
+        const messageData = JSON.parse(message.toString());
+        const {recipient,text} = messageData;
+        
+        
+        // we are using userId jo message object mai aayi thi => usssai pehle reciever ko find kr rhe hain
     // and then use text send kr rhe 
-
+        console.log("MESSAGE RECEIVED:", messageData);
+        console.log("recipient:", recipient);
+        console.log("recipient type:", typeof recipient);
     if (recipient && text) {
         const messageDoc = await Message.create({
             sender:connection.userId,

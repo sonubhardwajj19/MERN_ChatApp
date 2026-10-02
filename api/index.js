@@ -120,6 +120,34 @@ const wss = new WebSocketServer({server});
 
 wss.on('connection', (connection,req)=>{
 
+    function notifyAboutOnlinePeople(){
+          [...wss.clients]
+            .forEach(client => {
+                client.send(JSON.stringify({
+                    online:  [...wss.clients]
+                    .map( c => ({userId:c.userId , username:c.username}))
+                }))
+            })
+    
+    }
+    connection.isAlive = true;
+
+    connection.timer = setInterval(() => {
+        connection.ping();
+        connection.deathTimer = setTimeout(() => {
+            connection.isAlive = false;
+            connection.terminate();
+            notifyAboutOnlinePeople();
+            console.log('Dead')
+        }, 1000);
+    }, 5000);
+
+
+    connection.on('pong', ()=>{
+        clearTimeout(connection.deathTimer);
+    })
+
+
     const cookies = req.headers.cookie;
     if(cookies){
         const tokenCookieString = cookies.split(';').find(string => string.startsWith('token='));
@@ -138,28 +166,18 @@ wss.on('connection', (connection,req)=>{
     
     
     // notify everyone when some new user connects
-    
-    [...wss.clients]
-    .forEach(client => {
-        client.send(JSON.stringify({
-            online:  [...wss.clients]
-            .map( c => ({userId:c.userId , username:c.username}))
-        }))
-    })
-    
+    notifyAboutOnlinePeople();
+
     
     
     connection.on('message', async (message)=> {
-        console.log("hintner");
         const messageData = JSON.parse(message.toString());
         const {recipient,text} = messageData;
         
         
         // we are using userId jo message object mai aayi thi => usssai pehle reciever ko find kr rhe hain
-    // and then use text send kr rhe 
-        console.log("MESSAGE RECEIVED:", messageData);
-        console.log("recipient:", recipient);
-        console.log("recipient type:", typeof recipient);
+        // and then use text send kr rhe 
+
     if (recipient && text) {
         const messageDoc = await Message.create({
             sender:connection.userId,

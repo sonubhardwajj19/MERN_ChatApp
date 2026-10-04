@@ -157,7 +157,7 @@ wss.on('connection', (connection,req)=>{
         clearTimeout(connection.deathTimer);
     })
 
-    connection.on('close', () => {
+   connection.on('close', () => {
         clearInterval(connection.timer);
         clearTimeout(connection.deathTimer);
         notifyAboutOnlinePeople();
@@ -211,5 +211,7 @@ wss.on('connection', (connection,req)=>{
        // notify everyone when some new user connects
     notifyAboutOnlinePeople();
  
-
 })
+
+
+export default app;

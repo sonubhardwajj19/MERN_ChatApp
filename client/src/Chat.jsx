@@ -18,28 +18,23 @@ export default function Chat() {
     const [newMessageText, setNewMessageText] = useState('');
     const [messages, setMessages] = useState([]);
     const divUnderMessages = useRef();
-    const shouldReconnect = useRef(true);
 
     
-   useEffect(() => {
-        connectToWs();
-    }, [selectedUserId]);
-
     function connectToWs () {
         const ws = new WebSocket('ws://localhost:4000');
         setWs(ws);
         ws.addEventListener('message',handleMessage);
-
-        ws.addEventListener('close', () => {
-            if(!shouldReconnect.current) {return;}
+        ws.addEventListener('close',() => {
             setTimeout(() => {
                 console.log('Disconnected, trying to reconnect');
                 connectToWs();
             }, 1000);
         })
     }
-
-  
+    
+    useEffect(()=>{
+         connectToWs();
+    },[])
 
     function handleMessage (ev) {
         const messageData = JSON.parse(ev.data);
@@ -47,8 +42,10 @@ export default function Chat() {
         if('online' in messageData){
             showOnlinePeople(messageData.online);
         } else if('text' in messageData){
-          setMessages(prev => ([...prev,{...messageData}]));
-        }
+               if(messageData.sender === selectedUserId){
+                   setMessages(prev => ([...prev,{...messageData}]));
+               }
+         }
     }
 
     function showOnlinePeople (peopleArray){
@@ -81,11 +78,8 @@ export default function Chat() {
         
     }
 
-
     function Logout() {
        axios.post('/logout').then(()=>{
-       shouldReconnect.current = false;
-         ws.close();
          setWs(null);
          setId(null);
          setUsername(null);
@@ -146,6 +140,7 @@ export default function Chat() {
             ))}
                 {Object.keys(offlinePeople).map(userId => (
                 <Contact
+                    key={userId}
                     id={userId}
                     online={false}
                     username={offlinePeople[userId].username}

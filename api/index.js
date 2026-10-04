@@ -122,7 +122,7 @@ app.get('/messages/:userId',async (req,res)=>{
     
 })
 
-const server = app.listen(4000);
+const server = app.listen(process.env.PORT || 4000)
 
 const wss = new WebSocketServer({server});
 

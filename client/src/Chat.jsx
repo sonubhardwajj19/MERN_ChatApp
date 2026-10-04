@@ -14,26 +14,32 @@ export default function Chat() {
     const [onilnePeople , setOnlinePeople] = useState({});
     const [offlinePeople , setOfflinePeople] = useState({});
     const [selectedUserId, setSelectedUserId] = useState(null);
-    const {username, id} = useContext(UserContext);
+    const {username, id, setId, setUsername} = useContext(UserContext);
     const [newMessageText, setNewMessageText] = useState('');
     const [messages, setMessages] = useState([]);
     const divUnderMessages = useRef();
+    const shouldReconnect = useRef(true);
 
-    useEffect(()=>{
-         connectToWs();
-    },[])
+    
+   useEffect(() => {
+        connectToWs();
+    }, [selectedUserId]);
 
     function connectToWs () {
         const ws = new WebSocket('ws://localhost:4000');
         setWs(ws);
         ws.addEventListener('message',handleMessage);
-        ws.addEventListener('close',() => {
+
+        ws.addEventListener('close', () => {
+            if(!shouldReconnect.current) {return;}
             setTimeout(() => {
                 console.log('Disconnected, trying to reconnect');
                 connectToWs();
             }, 1000);
         })
     }
+
+  
 
     function handleMessage (ev) {
         const messageData = JSON.parse(ev.data);
@@ -74,6 +80,17 @@ export default function Chat() {
         setNewMessageText('');
         
     }
+
+
+    function Logout() {
+       axios.post('/logout').then(()=>{
+       shouldReconnect.current = false;
+         ws.close();
+         setWs(null);
+         setId(null);
+         setUsername(null);
+       })
+    }
     
     useEffect(()=>{
         const div = divUnderMessages.current;
@@ -83,9 +100,11 @@ export default function Chat() {
     },[messages]);
 
     useEffect(()=>{
-      axios.get('/messages/'+selectedUserId).then(res=>{
-        setMessages(res.data)
-      })
+        if(selectedUserId){
+         axios.get('/messages/'+selectedUserId).then(res=>{
+            setMessages(res.data);
+            })
+        }
     },[selectedUserId]);
 
 
@@ -111,27 +130,42 @@ export default function Chat() {
     return <>
     <div className="flex h-screen">
 
-        <div className="bg-white w-1/3 shadow-lg shadow-gray-900">
+        <div className="bg-white w-1/3 flex flex-col">
         
-            <Logo/>
-             {Object.keys(onlinePeopleExclOurUser).map(userId => (
-               <Contact
-                 id={userId}
-                 online={true}
-                 username={onlinePeopleExclOurUser[userId]}
-                 onClick={()=> setSelectedUserId(userId)}
-                 selected={userId === selectedUserId}
-               />
-           ))}
-             {Object.keys(offlinePeople).map(userId => (
-               <Contact
-                 id={userId}
-                 online={false}
-                 username={offlinePeople[userId].username}
-                 onClick={()=> setSelectedUserId(userId)}
-                 selected={userId === selectedUserId}
-               />
-           ))}
+            <div className="flex-grow">
+                <Logo/>
+                {Object.keys(onlinePeopleExclOurUser).map(userId => (
+                <Contact
+                    key={userId}
+                    id={userId}
+                    online={true}
+                    username={onlinePeopleExclOurUser[userId]}
+                    onClick={()=> setSelectedUserId(userId)}
+                    selected={userId === selectedUserId}
+                />
+            ))}
+                {Object.keys(offlinePeople).map(userId => (
+                <Contact
+                    id={userId}
+                    online={false}
+                    username={offlinePeople[userId].username}
+                    onClick={()=> setSelectedUserId(userId)}
+                    selected={userId === selectedUserId}
+                />
+            ))}
+            </div>
+            <div className="p-5 text-center flex items-center justify-center">
+                <span className="flex mr-4 text-gray-500 items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+                        <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
+                    </svg>
+                    {username}
+                </span>
+                 <button onClick={Logout}
+                    className="bg-blue-100 py-1 px-3 text-gray-500 rounded-sm border cursor-pointer">
+                    LogOut
+                 </button>
+            </div>
         </div>
 
 

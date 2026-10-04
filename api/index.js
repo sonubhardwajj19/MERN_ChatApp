@@ -35,7 +35,9 @@ app.post('/register' , async (req,res) => {
         const hashedPassword = bcrypt.hashSync(password,bcryptSalt)
         const createdUser = await User.create({username,password:hashedPassword});
         jwt.sign({userId:createdUser._id,username}, jwtSecret, (err,token) => {
-            if(err) throw err;
+            if(err) {
+                res.status(500).json('Username already exists')
+            };
             res.cookie('token',token , {sameSite:'none' , secure:true}).status(201).json({
                 id : createdUser._id
             });
@@ -61,12 +63,18 @@ app.post('/login', async (req,res)  => {
              })
           })
        }
+    } else {
+        res.status(401).json('wrong credentials');
     }
 })
 
 
-async function getUserDataFromRequest(req) {
+app.post('/logout', (req,res)=>{
+    res.cookie('token','',{sameSite:'none', secure:true}).json('ok');
+})
 
+
+async function getUserDataFromRequest(req) {
     return new Promise((resolve,reject)=>{
         const token= req.cookies?.token;
         if(token) {
@@ -118,27 +126,29 @@ const server = app.listen(4000);
 
 const wss = new WebSocketServer({server});
 
-wss.on('connection', (connection,req)=>{
 
-    function notifyAboutOnlinePeople(){
-          [...wss.clients]
-            .forEach(client => {
-                client.send(JSON.stringify({
-                    online:  [...wss.clients]
-                    .map( c => ({userId:c.userId , username:c.username}))
-                }))
-            })
+wss.on('connection', (connection,req)=>{
     
+    function notifyAboutOnlinePeople(){
+      [...wss.clients]
+        .forEach(client => {
+            client.send(JSON.stringify({
+                online:  [...wss.clients]
+                .map( c => ({userId:c.userId , username:c.username}))
+            }))
+        })
     }
+
     connection.isAlive = true;
 
     connection.timer = setInterval(() => {
         connection.ping();
         connection.deathTimer = setTimeout(() => {
-            connection.isAlive = false;
-            connection.terminate();
-            notifyAboutOnlinePeople();
-            console.log('Dead')
+        connection.isAlive = false;
+        clearInterval(connection.timer);
+        connection.terminate();
+        notifyAboutOnlinePeople();
+        console.log('dead');
         }, 1000);
     }, 5000);
 
@@ -146,6 +156,12 @@ wss.on('connection', (connection,req)=>{
     connection.on('pong', ()=>{
         clearTimeout(connection.deathTimer);
     })
+
+    connection.on('close', () => {
+        clearInterval(connection.timer);
+        clearTimeout(connection.deathTimer);
+        notifyAboutOnlinePeople();
+    });
 
 
     const cookies = req.headers.cookie;
@@ -163,11 +179,6 @@ wss.on('connection', (connection,req)=>{
             }
         }
     }
-    
-    
-    // notify everyone when some new user connects
-    notifyAboutOnlinePeople();
-
     
     
     connection.on('message', async (message)=> {
@@ -196,6 +207,9 @@ wss.on('connection', (connection,req)=>{
     }
     
     });
-  
+   
+       // notify everyone when some new user connects
+    notifyAboutOnlinePeople();
  
+
 })

@@ -21,7 +21,7 @@ export default function Chat() {
 
     
     function connectToWs () {
-        const ws = new WebSocket(import.meta.env.WS_URL);
+        const ws = new WebSocket(import.meta.env.VITE_WS_URL);
         setWs(ws);
         ws.addEventListener('message',handleMessage);
         ws.addEventListener('close',() => {
@@ -124,7 +124,7 @@ export default function Chat() {
     return <>
     <div className="flex h-screen">
 
-        <div className="bg-white w-1/3 flex flex-col">
+        <div className="bg-[#15151D] w-1/3 flex flex-col">
         
             <div className="flex-grow">
                 <Logo/>
@@ -149,22 +149,23 @@ export default function Chat() {
                 />
             ))}
             </div>
+
             <div className="p-5 text-center flex items-center justify-center">
-                <span className="flex mr-4 text-gray-500 items-center gap-1">
+                <span className="flex mr-4 text-gray-400 items-center gap-1">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
                         <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
                     </svg>
                     {username}
                 </span>
                  <button onClick={Logout}
-                    className="bg-blue-100 py-1 px-3 text-gray-500 rounded-sm border cursor-pointer">
+                    className="bg-blue-900 py-1 px-3 text-gray-100 rounded-sm border border-gray-400 cursor-pointer hover:bg-blue-800 hover:text-white">
                     LogOut
                  </button>
             </div>
         </div>
 
 
-        <div className="bg-blue-100 w-2/3 p-3 flex flex-col ">
+        <div className="bg-[#101116] w-2/3 p-2 flex flex-col border-l-3 border-[#252532]">
 
            <div className="flex-grow">
             
@@ -178,11 +179,11 @@ export default function Chat() {
 
                 {!!selectedUserId && (
                 
-                    <div className="relative h-full ">
-                        <div className="p-2 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-transparent absolute top-0 right-0 left-0 bottom-0">
+                    <div className="relative h-full mr-5 ml-5">
+                        <div className="p-2 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-blue-700 scrollbar-track-transparent absolute top-0 right-0 left-0 bottom-0">
                             {messsagesWihtoutDupes.map(message => (
-                                <div key={message._id} className="flex ">
-                                    <div className={"p-2.5 my-2 mr-2  rounded-md text-sm max-w-[80%] break-words inline-block "+ (message.sender === id ? 'bg-blue-500 text-white ml-auto' : 'bg-gray-400 text-white')}>
+                                <div key={message._id} className="flex">
+                                    <div className={"p-2.5 my-2 mr-2  rounded-md text-sm max-w-[80%] break-words inline-block "+ (message.sender === id ? 'bg-blue-800 text-white ml-auto' : 'bg-gray-800 text-white')}>
                                         {message.text}
                                     </div>
                                 </div>
@@ -196,16 +197,16 @@ export default function Chat() {
 
 
            {!!selectedUserId && (
-                <form className="flex gap-2 m-5" onSubmit={sendMessage}>
+                <form className="flex gap-2 m-5 mb-8 " onSubmit={sendMessage}>
                     <input type="text" placeholder="Type your message here" 
                             value={newMessageText}
                             onChange={e => setNewMessageText(e.target.value)}
-                            className="bg-white p-3 border rounded-lg flex-grow" />
+                            className="bg-gray-300 hover:bg-gray-200 p-3 border rounded-lg flex-grow" />
 
                     <button  type="submit"
-                            className="bg-blue-500 p-3 text-white rounded-lg ">
+                            className="bg-blue-700 p-3 text-white rounded-lg ">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
                             </svg>
                     </button>
                 </form>

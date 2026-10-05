@@ -21,44 +21,46 @@ export default function RegisterAndLoginForm() {
 
 
     return <>
-       <div className="bg-gray-900 h-screen flex items-center">
+       <div className="bg-gray-950 h-screen flex items-center">
 
-        <div className="h-screen flex-1/4 bg-gray-900 p-5 flex items-center">
-          <img  src="./src/images/logo.jpg" alt="A person walking through a park" className="object-fill shadow-sm shadow-gray-400 rounded-3xl " />
+        <div className="h-screen flex-1/4  p-5 flex items-center ml-10">
+          <img  src="./src/images/logo.jpg" alt="A person walking through a park" className="object-fill border-2 border-gray-600 rounded-3xl " />
         </div>
 
         <div className="flex-1/3 h-full">
 
-           <div className="flex-col gap-10 bg-red-500 h-full items-center">
-               <span className="flex cols-2">CodeRoom</span>
+           <div className="flex flex-col gap-10 h-full items-center justify-center">
+               <span className="text-5xl mb-5 text-gray-300 font-serif italic">CodeRoom</span>
             <form className="w-100 mx-auto " onSubmit={handleSubmit}>
                 <input value={username}
                   onChange={(e)=>{setUsername(e.target.value)}}
                   type="text" placeholder="Username" 
-                  className="w-full bg-red-100 block p-3 mb-3 rounded-sm" />
+                  className="w-full bg-gray-500 block p-3 mb-3 rounded-sm text-white hover:bg-gray-400" />
 
                 <input value={password}
                   onChange={(e)=>(setPassword(e.target.value))}
                   type="password" placeholder="Password"
-                  className="w-full bg-red-100 block p-3 mb-3 rounded-sm"/>
-                <button className="w-full bg-blue-500 p-3 border-none rounded-sm text-white">
+                  className="w-full bg-gray-500 block p-3 mb-3 text-white rounded-sm hover:bg-gray-400"/>
+                <button className="w-full bg-blue-700 p-3 border-none rounded-sm text-white hover:bg-blue-600">
                   {isLoginOrRegister === 'register' ? 'Register'  : 'Login'}  
                 </button>
 
               <div className="text-blue-100 font-normal text-center mt-2">
                   { isLoginOrRegister === 'register' && (
-                    <div>
+                    <div className="text-gray-400">
                       Already a member ?
-                      <button onClick={()=> setIsLoginOrRegister('login')}>
+                      <button  className="hover:text-blue-600"
+                        onClick={()=> setIsLoginOrRegister('login')}>
                           Login here
                       </button>
                     </div>
                   )}
 
                   { isLoginOrRegister === 'login' && (
-                    <div>
+                    <div className="text-gray-400">
                       Don't have an acount ?
-                      <button onClick={()=> setIsLoginOrRegister('register')}>
+                      <button className="hover:text-blue-600"
+                         onClick={()=> setIsLoginOrRegister('register')}>
                           Register here
                       </button>
                     </div>
